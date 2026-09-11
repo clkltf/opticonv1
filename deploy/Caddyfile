@@ -1,4 +1,10 @@
-{$DOMAIN} {
+:80 {
     encode gzip
     reverse_proxy api:8080
 }
+
+# For HTTPS with a real domain, set DOMAIN in .env and replace this file with:
+# {$DOMAIN} {
+#     encode gzip
+#     reverse_proxy api:8080
+# }
