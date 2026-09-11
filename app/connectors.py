@@ -6,8 +6,8 @@ BINANCE_WS='wss://stream.binance.com:9443/ws/!ticker@arr'
 BYBIT_REST='https://api.bybit.com/v5/market/instruments-info?category=spot&limit=1000'
 BYBIT_WS='wss://stream.bybit.com/v5/public/spot'
 OKX_WS='wss://ws.okx.com:8443/ws/v5/public'
-STALE=float(os.getenv('STALE_MS','3000'))
 DEPTH_LIMIT=int(os.getenv('ORDERBOOK_SYMBOL_LIMIT','120'))
+bybit_books={}
 
 async def http_json(url):
     async with aiohttp.ClientSession() as s:
@@ -31,12 +31,10 @@ async def binance():
 async def binance_depth():
     while True:
         try:
-            await asyncio.sleep(15)
             rows=await http_json('https://api.binance.com/api/v3/ticker/24hr')
-            syms=[x['symbol'].lower() for x in rows if x.get('symbol','').endswith('USDT') and float(x.get('quoteVolume') or 0)>0]
-            syms=sorted(rows,key=lambda x:float(x.get('quoteVolume') or 0),reverse=True)
-            syms=[x['symbol'].lower() for x in syms if x.get('symbol','').endswith('USDT')][:DEPTH_LIMIT]
-            if not syms: continue
+            syms=sorted([x for x in rows if x.get('symbol','').endswith('USDT')],key=lambda x:float(x.get('quoteVolume') or 0),reverse=True)
+            syms=[x['symbol'].lower() for x in syms[:DEPTH_LIMIT]]
+            if not syms: await asyncio.sleep(5); continue
             streams='/'.join(f'{s}@depth20@100ms' for s in syms)
             url='wss://stream.binance.com:9443/stream?streams='+streams
             async with websockets.connect(url,ping_interval=20,max_size=16_000_000) as ws:
@@ -52,23 +50,31 @@ async def bybit_symbols():
     data=await http_json(BYBIT_REST)
     return [x['symbol'] for x in data['result']['list'] if x.get('quoteCoin')=='USDT' and x.get('status')=='Trading']
 
+def apply_bybit_book(symbol,d):
+    book=bybit_books.setdefault(symbol,{'b':{},'a':{}})
+    if d.get('u') is not None and d.get('type')=='snapshot': book={'b':{},'a':{}}; bybit_books[symbol]=book
+    for side,key in [('b','b'),('a','a')]:
+        for price,size in d.get(side,[]):
+            p=float(price); q=float(size)
+            if q==0: book[key].pop(p,None)
+            else: book[key][p]=q
+    q=state.quotes.get(symbol,{}).get('bybit')
+    if q:
+        q.bids=sorted([[p,s] for p,s in book['b'].items()],reverse=True)[:50]
+        q.asks=sorted([[p,s] for p,s in book['a'].items()])[:50]
+
 async def bybit_chunk(symbols):
     while True:
         try:
             async with websockets.connect(BYBIT_WS,ping_interval=20,max_size=8_000_000) as ws:
                 for i in range(0,len(symbols),10):
-                    await ws.send(json.dumps({'op':'subscribe','args':[f'tickers.{s}' for s in symbols[i:i+10]]}))
-                    await asyncio.sleep(.05)
+                    await ws.send(json.dumps({'op':'subscribe','args':[f'tickers.{s}' for s in symbols[i:i+10]]})); await asyncio.sleep(.05)
                 for i in range(0,min(len(symbols),DEPTH_LIMIT),10):
-                    await ws.send(json.dumps({'op':'subscribe','args':[f'orderbook.50.{s}' for s in symbols[i:i+10]]}))
-                    await asyncio.sleep(.05)
+                    await ws.send(json.dumps({'op':'subscribe','args':[f'orderbook.50.{s}' for s in symbols[i:i+10]]})); await asyncio.sleep(.05)
                 async for raw in ws:
                     msg=json.loads(raw); d=msg.get('data') or {}
                     if msg.get('topic','').startswith('orderbook.'):
-                        s=d.get('s',''); q=state.quotes.get(s,{}).get('bybit')
-                        if q:
-                            q.bids=[[float(x[0]),float(x[1])] for x in d.get('b',[])]; q.asks=[[float(x[0]),float(x[1])] for x in d.get('a',[])]
-                        continue
+                        s=d.get('s',''); apply_bybit_book(s,d); continue
                     if isinstance(d,list): d=d[0] if d else {}
                     s=d.get('symbol','')
                     if not s: continue
@@ -100,8 +106,7 @@ async def okx_chunk(symbols):
                 async for raw in ws:
                     msg=json.loads(raw)
                     for d in msg.get('data',[]):
-                        s=d.get('instId','').replace('-','')
-                        q=state.quotes.get(s,{}).get('okx')
+                        s=d.get('instId','').replace('-',''); q=state.quotes.get(s,{}).get('okx')
                         if msg.get('arg',{}).get('channel')=='books5':
                             if q:
                                 q.bids=[[float(x[0]),float(x[1])] for x in d.get('bids',[])]; q.asks=[[float(x[0]),float(x[1])] for x in d.get('asks',[])]
