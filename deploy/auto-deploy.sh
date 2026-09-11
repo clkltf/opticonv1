@@ -18,8 +18,18 @@ git fetch --quiet origin main
 LOCAL="$(git rev-parse HEAD)"
 REMOTE="$(git rev-parse origin/main)"
 
+# The web self-healer runs even when there is no new application commit.
+# This lets the existing systemd timer continuously repair host-side issues.
+chmod +x deploy/self-heal-web.sh deploy/update.sh
+
+auto_heal(){
+  echo "[$(date -Is)] Running web self-heal..."
+  deploy/self-heal-web.sh || echo "[$(date -Is)] Web self-heal reported a non-fatal error."
+}
+
 if [[ "$LOCAL" == "$REMOTE" ]]; then
   echo "[$(date -Is)] Already up to date."
+  auto_heal
   exit 0
 fi
 
@@ -28,7 +38,9 @@ echo "[$(date -Is)] New commit: $LOCAL -> $REMOTE"
 # GitHub is the deployment source of truth. Never touch .env (it is untracked).
 git reset --hard origin/main
 
-chmod +x deploy/update.sh
+chmod +x deploy/self-heal-web.sh deploy/update.sh
 deploy/update.sh
+
+auto_heal
 
 echo "[$(date -Is)] Automatic deployment completed."
