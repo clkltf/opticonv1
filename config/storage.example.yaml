@@ -1,0 +1,26 @@
+storage:
+  auto_discover: true
+  scan_interval_seconds: 300
+  minimum_free_gb: 10
+  emergency_reserve_percent: 15
+  critical_horizon_days: 7
+  warning_horizon_days: 30
+  prefer_mounts: []
+  exclude_mounts:
+    - /boot
+    - /boot/efi
+  classes:
+    hot: auto
+    warm: auto
+    cold: auto
+    learned: protected
+  cleanup:
+    compress_before_delete: true
+    delete_expired_raw: true
+    vacuum_database: true
+    preserve_signal_outcomes: true
+    preserve_learning_stats: true
+  migration:
+    background_copy: true
+    checksum_verify: true
+    resume_partial_copies: true
