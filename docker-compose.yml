@@ -6,8 +6,12 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    volumes:
+      - scanner_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=3)\""]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3
+volumes:
+  scanner_data:
