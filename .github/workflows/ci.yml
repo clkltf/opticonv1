@@ -1,7 +1,9 @@
 name: CI
+
 on:
   push:
   pull_request:
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,3 +16,5 @@ jobs:
       - run: python -m compileall app
       - run: pytest -q
       - run: docker build -t opticonv1-test .
+      - name: Validate Caddy configuration
+        run: docker run --rm -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
