@@ -1,17 +1,19 @@
-import asyncio, os, time, json
+import asyncio, time, json
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from .connectors import start_connectors
 from .detector import opportunities, movers, cross_exchange
 from .dex import dex_loop, dex_snapshot
+from .alerts import alert_loop
 from .state import state
 
-app=FastAPI(title='Global Spot Scanner',version='2.0.0')
+app=FastAPI(title='Global Spot Scanner',version='2.1.0')
 
 @app.on_event('startup')
 async def startup():
     asyncio.create_task(start_connectors())
     asyncio.create_task(dex_loop())
+    asyncio.create_task(alert_loop())
 
 @app.get('/api/health')
 def health():
@@ -43,8 +45,7 @@ async def ws(websocket:WebSocket):
         while True:
             await websocket.send_text(json.dumps({'ts':time.time(),'opportunities':opportunities(20),'movers':movers(30)},separators=(',',':')))
             await asyncio.sleep(1)
-    except (WebSocketDisconnect, RuntimeError):
-        return
+    except (WebSocketDisconnect, RuntimeError): return
 
 @app.get('/')
 def index(): return FileResponse('web/index.html')
