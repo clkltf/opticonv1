@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Hata: Docker bulunamadı. Önce ./kur.sh çalıştırın."
+  exit 1
+fi
+
+DC=(docker compose)
+
+pause() { read -r -p $'\nDevam etmek için Enter... ' _ || true; }
+
+status() {
+  echo "=== SİSTEM DURUMU ==="
+  "${DC[@]}" ps
+  echo
+  echo "=== API HEALTH ==="
+  curl -fsS http://localhost/api/health 2>/dev/null || echo "API erişilemiyor."
+}
+
+opportunities() {
+  local amount
+  read -r -p "İşlem tutarı USD [1000]: " amount
+  amount=${amount:-1000}
+  echo
+  curl -fsS "http://localhost/api/opportunities?limit=20&notional=${amount}" 2>/dev/null || echo "API erişilemiyor."
+}
+
+movers() {
+  curl -fsS "http://localhost/api/movers?limit=30" 2>/dev/null || echo "API erişilemiyor."
+}
+
+cross_exchange() {
+  curl -fsS "http://localhost/api/cross-exchange?limit=30" 2>/dev/null || echo "API erişilemiyor."
+}
+
+markets() {
+  curl -fsS http://localhost/api/markets 2>/dev/null || echo "API erişilemiyor."
+}
+
+logs() {
+  echo "=== SON API/PROXY LOGLARI ==="
+  "${DC[@]}" logs --tail=80 api proxy
+}
+
+disk() {
+  echo "=== DİSK DURUMU ==="
+  df -hT
+  echo
+  echo "=== BAĞLI DİSKLER ==="
+  lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINTS,MODEL 2>/dev/null || true
+  echo
+  echo "=== DOCKER KULLANIMI ==="
+  docker system df
+}
+
+restart() {
+  "${DC[@]}" up -d
+  "${DC[@]}" ps
+}
+
+test_all() {
+  echo "=== TEMEL TESTLER ==="
+  local ok=0
+  if curl -fsS http://localhost/api/health >/dev/null; then echo "[OK] API health"; else echo "[HATA] API health"; ok=1; fi
+  if curl -fsS 'http://localhost/api/opportunities?limit=1&notional=1000' >/dev/null; then echo "[OK] Fırsat endpoint"; else echo "[HATA] Fırsat endpoint"; ok=1; fi
+  if curl -fsS 'http://localhost/api/cross-exchange?limit=1' >/dev/null; then echo "[OK] Cross-exchange endpoint"; else echo "[HATA] Cross-exchange endpoint"; ok=1; fi
+  if "${DC[@]}" exec -T proxy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1; then echo "[OK] Caddy config"; else echo "[HATA] Caddy config"; ok=1; fi
+  return "$ok"
+}
+
+while true; do
+  clear 2>/dev/null || true
+  echo "=============================================="
+  echo "        OPTICONV1 YÖNETİM PANELİ"
+  echo "=============================================="
+  echo "1) Sistem durumu"
+  echo "2) Arbitraj fırsatları (dinamik USD)"
+  echo "3) Piyasa hareketleri"
+  echo "4) Borsalar arası fırsatlar"
+  echo "5) Tüm market verisi"
+  echo "6) Disk / depolama durumu"
+  echo "7) Logları göster"
+  echo "8) Servisleri yeniden başlat"
+  echo "9) Temel sistem testleri"
+  echo "0) Çıkış"
+  echo "----------------------------------------------"
+  read -r -p "Seçiminiz: " choice
+  echo
+  case "$choice" in
+    1) status; pause;;
+    2) opportunities; pause;;
+    3) movers; pause;;
+    4) cross_exchange; pause;;
+    5) markets; pause;;
+    6) disk; pause;;
+    7) logs; pause;;
+    8) restart; pause;;
+    9) test_all; pause;;
+    0) echo "Çıkılıyor."; exit 0;;
+    *) echo "Geçersiz seçim."; sleep 1;;
+  esac
+done
