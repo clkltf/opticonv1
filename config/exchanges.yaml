@@ -1,40 +1,38 @@
-# Global exchange catalog.
-# enabled=true means the venue is eligible for discovery; connector implementations may
-# be native_ws, rest_poll, or dex/indexer. Keep API-specific URLs in env/adapter modules.
+# Global exchange catalog. Only implemented adapters are enabled.
+# Add a venue here only after its adapter and tests are implemented.
 # Never put API keys in this file.
 exchanges:
   - {id: binance, name: Binance, type: cex, market: spot, adapter: native_ws, enabled: true}
   - {id: bybit, name: Bybit, type: cex, market: spot, adapter: native_ws, enabled: true}
   - {id: okx, name: OKX, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: coinbase, name: Coinbase, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: kraken, name: Kraken, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: kucoin, name: KuCoin, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: gate, name: Gate, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: mexc, name: MEXC, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bitget, name: Bitget, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: htx, name: HTX, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bitfinex, name: Bitfinex, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: crypto_com, name: Crypto.com, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: gemini, name: Gemini, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bitstamp, name: Bitstamp, type: cex, market: spot, adapter: native_ws, enabled: true}
+  - {id: coinbase, name: Coinbase, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: kraken, name: Kraken, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: kucoin, name: KuCoin, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: gate, name: Gate, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: mexc, name: MEXC, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bitget, name: Bitget, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: htx, name: HTX, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bitfinex, name: Bitfinex, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: crypto_com, name: Crypto.com, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: gemini, name: Gemini, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bitstamp, name: Bitstamp, type: cex, market: spot, adapter: native_ws, enabled: false}
   - {id: bybit_tr, name: Bybit TR, type: cex, market: spot, adapter: native_ws, enabled: false}
-  - {id: upbit, name: Upbit, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bitrue, name: Bitrue, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: whitebit, name: WhiteBIT, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bitmart, name: BitMart, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: lbank, name: LBank, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: poloniex, name: Poloniex, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: coinex, name: CoinEx, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: phemex, name: Phemex, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bingx, name: BingX, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: deepcoin, name: Deepcoin, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: bitunix, name: Bitunix, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: btse, name: BTSE, type: cex, market: spot, adapter: native_ws, enabled: true}
+  - {id: upbit, name: Upbit, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bitrue, name: Bitrue, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: whitebit, name: WhiteBIT, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bitmart, name: BitMart, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: lbank, name: LBank, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: poloniex, name: Poloniex, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: coinex, name: CoinEx, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: phemex, name: Phemex, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bingx, name: BingX, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: deepcoin, name: Deepcoin, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: bitunix, name: Bitunix, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: btse, name: BTSE, type: cex, market: spot, adapter: native_ws, enabled: false}
   - {id: p2b, name: P2B, type: cex, market: spot, adapter: rest_poll, enabled: false}
-  - {id: coinw, name: CoinW, type: cex, market: spot, adapter: native_ws, enabled: true}
-  - {id: tokocrypto, name: Tokocrypto, type: cex, market: spot, adapter: native_ws, enabled: true}
+  - {id: coinw, name: CoinW, type: cex, market: spot, adapter: native_ws, enabled: false}
+  - {id: tokocrypto, name: Tokocrypto, type: cex, market: spot, adapter: native_ws, enabled: false}
 
-# DEX networks are tracked by pool/indexer adapters, not CEX connectors.
 dex_networks:
   - ethereum
   - solana
