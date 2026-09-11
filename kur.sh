@@ -33,6 +33,7 @@ fi
 
 mkdir -p data
 chmod 700 data
+chmod +x "$ROOT/kur.sh" "$ROOT/yonet" 2>/dev/null || true
 
 ufw allow OpenSSH || true
 ufw allow 80/tcp
@@ -59,3 +60,4 @@ else
 fi
 
 echo 'Kurulum tamamlandı.'
+echo 'Yönetim paneli: ./yonet'
