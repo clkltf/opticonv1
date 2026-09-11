@@ -1,0 +1,9 @@
+[Unit]
+Description=OpticonV1 automatic GitHub deployment
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/opticonv1
+ExecStart=/root/opticonv1/deploy/auto-deploy.sh
