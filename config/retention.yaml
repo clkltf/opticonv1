@@ -1,0 +1,33 @@
+# Storage policy for a 200 GB-class Ubuntu server.
+# Values are defaults; adjust after observing actual ingest rate.
+retention:
+  raw_market_events_days: 30
+  trades_days: 90
+  orderbook_snapshots_days: 14
+  quotes_days: 180
+  candles_days: 1825
+  signals_days: 3650
+  signal_outcomes_days: 3650
+  whale_events_days: 3650
+  errors_days: 3650
+
+sampling:
+  quote_snapshot_ms: 1000
+  orderbook_snapshot_ms: 1000
+  candle_intervals: [1s, 5s, 10s, 30s, 1m, 5m, 15m, 1h, 4h, 1d]
+  keep_raw_ticks: false
+  compress_archives: true
+
+# Signal replay automatically records the market state at signal time and
+# evaluates forward returns without claiming that a trade was actually executed.
+outcome_windows_seconds: [10, 30, 60, 300, 900, 3600, 14400, 86400, 604800]
+
+# Hypothetical portfolio analysis defaults. These are NOT trading instructions.
+paper_trade:
+  default_notional_usd: 10000
+  include_entry_fee: true
+  include_exit_fee: true
+  include_estimated_slippage: true
+  include_spread: true
+  include_transfer_cost: false
+  initial_cash_usd: 10000
