@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict, deque
-from dataclasses import dataclass, asdict
-from typing import Dict
+from dataclasses import dataclass, asdict, field
+from typing import Dict, List
 
 @dataclass
 class Quote:
@@ -12,20 +12,23 @@ class Quote:
     ask: float
     volume_24h: float
     ts: float
+    bids: List[list] = field(default_factory=list)
+    asks: List[list] = field(default_factory=list)
 
 class MarketState:
-    def __init__(self, max_history=180):
+    def __init__(self, max_history=900):
         self.quotes: Dict[str, Dict[str, Quote]] = defaultdict(dict)
         self.history = defaultdict(lambda: defaultdict(lambda: deque(maxlen=max_history)))
+        self.dex = {}
 
     def update(self, q: Quote):
         self.quotes[q.symbol][q.exchange] = q
         self.history[q.symbol][q.exchange].append((q.ts, q.price, q.volume_24h))
 
-    def snapshot(self):
-        return {s: {e: asdict(q) for e, q in venues.items()} for s, venues in self.quotes.items()}
-
     def age_ms(self, q: Quote) -> float:
         return max(0.0, (time.time() - q.ts) * 1000)
+
+    def snapshot(self):
+        return {s: {e: asdict(q) for e, q in venues.items()} for s, venues in self.quotes.items()}
 
 state = MarketState()
