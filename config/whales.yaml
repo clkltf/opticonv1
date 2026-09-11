@@ -1,0 +1,33 @@
+# Whale tracking is intentionally configuration-driven.
+# There is no public registry containing literally every whale wallet.
+# Add labeled/known wallets or import addresses from supported chain-indexer exports.
+# Never put private keys or seed phrases here.
+settings:
+  enabled: true
+  min_usd_transfer: 100000
+  min_usd_exchange_flow: 250000
+  refresh_seconds: 30
+  retain_raw_events: true
+  labels_required_for_alert: false
+  chains: [ethereum, bitcoin, solana, base, arbitrum, optimism, bsc, avalanche, polygon, tron, sui, aptos]
+
+wallets:
+  # Example structure; populate with verified public addresses.
+  # - chain: ethereum
+  #   address: "0x..."
+  #   label: "Known Whale"
+  #   tags: [whale, smart_money]
+  []
+
+# Detection rules
+rules:
+  exchange_inflow: true
+  exchange_outflow: true
+  whale_transfer: true
+  whale_swap: true
+  stablecoin_mint_burn: true
+  liquidity_add_remove: true
+  token_accumulation: true
+  token_distribution: true
+  dormant_wallet_wake: true
+  first_time_large_holder: true
