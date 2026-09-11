@@ -5,15 +5,17 @@ from .connectors import start_connectors
 from .detector import opportunities, movers, cross_exchange
 from .dex import dex_loop, dex_snapshot
 from .alerts import alert_loop
+from .recorder import recorder_loop
 from .state import state
 
-app=FastAPI(title='Global Spot Scanner',version='2.1.0')
+app=FastAPI(title='Global Spot Scanner',version='2.2.0')
 
 @app.on_event('startup')
 async def startup():
     asyncio.create_task(start_connectors())
     asyncio.create_task(dex_loop())
     asyncio.create_task(alert_loop())
+    asyncio.create_task(recorder_loop())
 
 @app.get('/api/health')
 def health():
